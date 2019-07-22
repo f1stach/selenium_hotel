@@ -5,6 +5,7 @@ from page_object_pattern.pages.search_hotel import SearchHotelPage
 from page_object_pattern.pages.search_results import SearchResultsPage
 import allure
 # from page_object_pattern.tests.base_test import BaseTest
+from page_object_pattern.utils.read_excel import ExcelReader
 
 
 # aby uzywac metody setup() z base_test używamy poniższego fixture z nazwą metody setup w argumencie.
@@ -28,14 +29,21 @@ class TestHotelSearch:  # metoda nr 2 dla setup - tylko setup w fixture, bez roz
 
     # tworzymy metodę testową:
 
-    def test_hotel_search(self, setup):
+    # dodajemy testy sprawdzający dane z Excela - stąd fixture parametrize:
+
+    @pytest.mark.parametrize("data", ExcelReader.get_data())
+    def test_hotel_search(self, setup, data):
         # otwieramy stronę:
         self.driver.get("http://www.kurs-selenium.pl/demo/")
 
         # tworzymy nowy obiekt klasy SearchHotelPage
         search_hotel_page = SearchHotelPage(self.driver)
         search_hotel_page.set_city("Dubai")
-        search_hotel_page.set_date_range("28/07/2019", "31/07/2019")
+        # search_hotel_page.set_date_range("28/07/2019", "31/07/2019")
+
+        # zamieniamy linię wyżej na dane wczytane z arkusza Excel:
+        search_hotel_page.set_date_range(data.check_in, data.check_out)
+
         search_hotel_page.set_travellers("2", "2")
         search_hotel_page.perform_search()
 
